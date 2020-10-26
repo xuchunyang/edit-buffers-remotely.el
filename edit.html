@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit Emacs Buffer</title>
+    <style>
+      textarea {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Edit Emacs Buffer</h1>
+    <p></p>
+    <textarea rows=20 cols=80></textarea>
+    <script>
+      const basename = url => url.substring(url.lastIndexOf('/')+1);
+      const buffer = decodeURIComponent(basename(document.location.pathname));
+      document.title = `${buffer}`;
+      document.querySelector("h1").innerText = `${buffer}`;
+
+      const textarea = document.querySelector("textarea");
+      const ws = new WebSocket(document.URL.replace(/^http/, "ws"));
+      let initialized = false;
+      ws.onopen = () => {
+        console.log("connected");
+      };
+      ws.onmessage = (msg) => {
+        console.log("onmessage", msg);
+        if (!initialized) {
+          initialized = true;
+          textarea.value = msg.data;
+          textarea.onchange = (_e) => {
+            ws.send(textarea.value);
+          };
+          return;
+        }
+        const errMsg = msg.data;
+        document.querySelector("p").innerText = errMsg;
+      };
+      ws.onclose = () => {
+        console.log("connection closed");
+      };
+    </script>
+  </body>
+</html>

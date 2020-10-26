@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit Emacs Buffers</title>
+  </head>
+  <body>
+    <h1>Edit Emacs Buffers</h1>
+    <p>There are <span id="count"></span> live buffers, click a link to edit the buffer</p>
+    <ul id="output"></ul>
+    <script>
+      (async () => {
+        const response = await fetch("/api/buffer-list");
+        if (!response.ok) {
+          console.log(`HTTP Error! status code: ${response.status}`);
+          return;
+        }
+        const buffers = await response.json();
+        const output = document.querySelector("#output");
+        output.innerHTML = buffers
+          .map(buffer => `<li><a href="/edit/${buffer}">${buffer}</a></li>`)
+          .join("\n");
+        const count = document.querySelector("#count");
+        count.innerText = buffers.length;
+      })();
+    </script>
+  </body>
+</html>

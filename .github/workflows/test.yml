@@ -1,0 +1,22 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        emacs_version:
+          - 25.1
+          - 25.3
+          - 26.1
+          - 26.3
+          - 27.1
+    steps:
+    - uses: purcell/setup-emacs@master
+      with:
+        version: ${{ matrix.emacs_version }}
+    - uses: actions/checkout@v2
+    - name: Byte Compile
+      run: "emacs -Q --batch -f batch-byte-compile edit-buffers-remotely.el"
