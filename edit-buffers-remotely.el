@@ -4,7 +4,7 @@
 
 ;; Author: Xu Chunyang
 ;; Homepage: https://github.com/xuchunyang/edit-buffers-remotely.el
-;; Package-Requires: ((emacs "25.1"))
+;; Package-Requires: ((emacs "25.1") (web-server "20200330.1407"))
 ;; Keywords: tools
 ;; Version: 0
 
