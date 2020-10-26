@@ -8,7 +8,19 @@
   <body>
     <h1>Edit Emacs Buffers</h1>
     <p>There are <span id="count"></span> live buffers, click a link to edit the buffer</p>
-    <ul id="output"></ul>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Size</th>
+          <th>Mode</th>
+          <th>Filename/Process</th>
+        </tr>
+      </thead>
+      <tbody id="output">
+        <!-- Buffers -->
+      </tbody>
+    </table>
     <script>
       (async () => {
         const response = await fetch("/api/buffer-list");
@@ -19,7 +31,15 @@
         const buffers = await response.json();
         const output = document.querySelector("#output");
         output.innerHTML = buffers
-          .map(buffer => `<li><a href="/edit/${buffer}">${buffer}</a></li>`)
+          .map(({name, mode, size, file, proc}) => {
+            return `\
+<tr>
+  <td><a href="/edit/${name}">${name}</a></td>
+  <td>${mode}</td>
+  <td>${size}</td>
+  <td>${file || proc || ""}</td>
+</tr>`;
+          })
           .join("\n");
         const count = document.querySelector("#count");
         count.innerText = buffers.length;

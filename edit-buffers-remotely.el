@@ -118,13 +118,17 @@
 
 (defun edit-buffers-remotely-server--/api/buffer-list (request)
   (let ((proc (oref request process))
-        (body (funcall
-               (if (fboundp 'json-serialize)
-                   'json-serialize
-                 #'json-encode-array)
-               (seq-into
-                (mapcar #'buffer-name (edit-buffers-remotely-buffer-list))
-                'vector))))
+        (body (json-encode
+               (mapcar (lambda (buffer)
+                         (with-current-buffer buffer
+                           `((name . ,(buffer-name))
+                             (mode . ,(format-mode-line mode-name nil nil
+                                                        (current-buffer)))
+                             (size . ,(buffer-size))
+                             (file . ,(buffer-file-name))
+                             (proc . ,(when-let ((proc (get-buffer-process buffer)))
+                                        (process-name proc))))))
+                       (edit-buffers-remotely-buffer-list)))))
     (ws-response-header
      proc 200
      '("Content-Type" . "application/json; charset=utf-8")
