@@ -24,3 +24,5 @@ jobs:
         emacs -Q --batch -L . -f batch-byte-compile web-server*
     - name: Byte Compile
       run: "emacs -Q --batch -L . -f batch-byte-compile edit-buffers-remotely.el"
+    - name: Run Tests
+      run: "emacs -Q --batch -L . -l edit-buffers-remotely-tests -f ert-run-tests-batch-and-exit"
