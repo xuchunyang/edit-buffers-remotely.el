@@ -18,5 +18,9 @@ jobs:
       with:
         version: ${{ matrix.emacs_version }}
     - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        curl -s --remote-name-all https://raw.githubusercontent.com/eschulte/emacs-web-server/master/web-server{,-status-codes}.el
+        emacs -Q --batch -L . -f batch-byte-compile web-server*
     - name: Byte Compile
-      run: "emacs -Q --batch -f batch-byte-compile edit-buffers-remotely.el"
+      run: "emacs -Q --batch -L . -f batch-byte-compile edit-buffers-remotely.el"
