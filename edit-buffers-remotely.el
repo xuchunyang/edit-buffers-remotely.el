@@ -160,8 +160,10 @@
                  proc
                  (ws-web-socket-frame
                   (with-current-buffer buffer
-                    (buffer-substring-no-properties
-                     (point-min) (point-max))))))
+                    (encode-coding-string
+                     (buffer-substring-no-properties
+                      (point-min) (point-max))
+                     'utf-8)))))
             (ws-send-file
              proc
              (expand-file-name "edit.html" edit-buffers-remotely--load-dir)
