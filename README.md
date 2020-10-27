@@ -1,5 +1,7 @@
 # Edit Emacs Buffers in a Web browser
 
+![Test](https://github.com/xuchunyang/edit-buffers-remotely.el/workflows/Test/badge.svg)
+
 `M-x edit-buffers-remotely-server-start` starts a HTTP server which exposes
 Emacs buffers. User can edit the contents of the buffer in a `<textarea>`
 element. The changes will be sync back to Emacs via WebSocket when the
