@@ -23,6 +23,6 @@ jobs:
         curl -s --remote-name-all https://raw.githubusercontent.com/eschulte/emacs-web-server/master/web-server{,-status-codes}.el
         emacs -Q --batch -L . -f batch-byte-compile web-server*
     - name: Byte Compile
-      run: "emacs -Q --batch -L . -f batch-byte-compile edit-buffers-remotely.el"
+      run: emacs -Q --batch -L . --eval "(setq byte-compile-error-on-warn t)" -f batch-byte-compile edit-buffers-remotely.el
     - name: Run Tests
-      run: "emacs -Q --batch -L . -l edit-buffers-remotely-tests -f ert-run-tests-batch-and-exit"
+      run: emacs -Q --batch -L . -l edit-buffers-remotely-tests -f ert-run-tests-batch-and-exit
