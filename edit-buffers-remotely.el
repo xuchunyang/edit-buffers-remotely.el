@@ -101,9 +101,31 @@
              (setq edit-buffers-remotely-server nil))
     (user-error "No server is running")))
 
+;; `httpd-etag'
+(defun edit-buffers-remotely-server--etag (file)
+  "Compute the ETag for FILE."
+  (concat "\"" (substring (sha1 (prin1-to-string (file-attributes file))) -16)
+          "\""))
+
+(defun edit-buffers-remotely-server--send-file (request path type)
+  (with-slots (headers process) request
+    (let ((request-etag (alist-get :IF-NONE-MATCH headers))
+          (etag (edit-buffers-remotely-server--etag path)))
+      (if (equal request-etag etag)
+          (ws-response-header process 304)
+        (with-temp-buffer
+          (set-buffer-multibyte nil)
+          (insert-file-contents-literally path)
+          (ws-response-header
+           process 200
+           (cons "Content-Type" type)
+           (cons "Content-Length" (buffer-size))
+           (cons "Etag" etag))
+          (process-send-region process (point-min) (point-max)))))))
+
 (defun edit-buffers-remotely-server--/ (request)
-  (ws-send-file
-   (oref request process)
+  (edit-buffers-remotely-server--send-file
+   request
    (expand-file-name "index.html" edit-buffers-remotely--load-dir)
    "text/html; charset=utf-8"))
 
@@ -164,8 +186,8 @@
                      (buffer-substring-no-properties
                       (point-min) (point-max))
                      'utf-8)))))
-            (ws-send-file
-             proc
+            (edit-buffers-remotely-server--send-file
+             request
              (expand-file-name "edit.html" edit-buffers-remotely--load-dir)
              "text/html; charset=utf-8"))
         (edit-buffers-remotely-server--404 request)))))
