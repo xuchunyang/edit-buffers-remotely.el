@@ -159,36 +159,35 @@
     (process-send-string proc body)))
 
 (defun edit-buffers-remotely-server--/edit/ (request)
-  (with-slots ((proc process) headers) request
-    (let* ((bufname (url-unhex-string
-                     (substring (alist-get :GET headers) (length "/edit/"))))
-           (buffer (get-buffer bufname)))
-      (if buffer
-          (if (ws-web-socket-connect
-               request
-               (lambda (proc string)
-                 (condition-case err
-                     (with-current-buffer buffer
-                       (erase-buffer)
-                       (insert string))
-                   (error
-                    (process-send-string
-                     proc
-                     (ws-web-socket-frame (error-message-string err)))))))
-              (prog1 :keep-alive
-                (process-send-string
-                 proc
-                 (ws-web-socket-frame
-                  (with-current-buffer buffer
-                    (encode-coding-string
-                     (buffer-substring-no-properties
-                      (point-min) (point-max))
-                     'utf-8)))))
-            (edit-buffers-remotely-server--send-file
+  (let* ((bufname (url-unhex-string
+                   (substring (alist-get :GET (oref request headers)) (length "/edit/"))))
+         (buffer (get-buffer bufname)))
+    (if buffer
+        (if (ws-web-socket-connect
              request
-             (expand-file-name "edit.html" edit-buffers-remotely--load-dir)
-             "text/html; charset=utf-8"))
-        (edit-buffers-remotely-server--404 request)))))
+             (lambda (proc string)
+               (condition-case err
+                   (with-current-buffer buffer
+                     (erase-buffer)
+                     (insert string))
+                 (error
+                  (process-send-string
+                   proc
+                   (ws-web-socket-frame (error-message-string err)))))))
+            (prog1 :keep-alive
+              (process-send-string
+               (oref request process)
+               (ws-web-socket-frame
+                (with-current-buffer buffer
+                  (encode-coding-string
+                   (buffer-substring-no-properties
+                    (point-min) (point-max))
+                   'utf-8)))))
+          (edit-buffers-remotely-server--send-file
+           request
+           (expand-file-name "edit.html" edit-buffers-remotely--load-dir)
+           "text/html; charset=utf-8"))
+      (edit-buffers-remotely-server--404 request))))
 
 (provide 'edit-buffers-remotely)
 ;;; edit-buffers-remotely.el ends here
