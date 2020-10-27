@@ -33,6 +33,7 @@
 (require 'json)
 (require 'web-server)
 (require 'seq)
+(eval-when-compile (require 'subr-x))   ; `when-let'
 
 (defgroup edit-buffers-remotely nil
   "Edit Emacs buffers from a web browser."
