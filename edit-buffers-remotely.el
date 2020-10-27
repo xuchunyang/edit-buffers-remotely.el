@@ -166,17 +166,14 @@
           (if (ws-web-socket-connect
                request
                (lambda (proc string)
-                 (let (err)
-                   (if (buffer-live-p buffer)
-                       (with-current-buffer buffer
-                         (if buffer-read-only
-                             (setq err
-                                   (format "Can't edit %s which is read-only" buffer))
-                           (erase-buffer)
-                           (insert string)))
-                     (setq err (format "Buffer %s does not exist" bufname)))
-                   (when err
-                     (process-send-string proc (ws-web-socket-frame err))))))
+                 (condition-case err
+                     (with-current-buffer buffer
+                       (erase-buffer)
+                       (insert string))
+                   (error
+                    (process-send-string
+                     proc
+                     (ws-web-socket-frame (error-message-string err)))))))
               (prog1 :keep-alive
                 (process-send-string
                  proc
